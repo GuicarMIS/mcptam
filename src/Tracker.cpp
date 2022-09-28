@@ -72,10 +72,10 @@
 
 
 // Static members
-double Tracker::sdRotationEstimatorBlur = 0.75;
+double Tracker::sdRotationEstimatorBlur = 0.75;  //0.75
 bool Tracker::sbUseRotationEstimator = true;
 bool Tracker::sbDrawFASTCorners = true;
-int Tracker::snMaxPatchesPerFrame = 1000;
+int Tracker::snMaxPatchesPerFrame = 1000;  //1000
 int Tracker::snMinPatchesPerFrame = 10;
 int Tracker::snCoarseMin = 15;
 int Tracker::snCoarseMax = 60;
@@ -818,7 +818,7 @@ void Tracker::FindPVS(std::string cameraName, TDVLevels& vPVSLevels)
 int Tracker::TestForCoarse(TDVLevels& vPVSLevels, std::string cameraName, unsigned int nCoarseRange,
                            unsigned int nCoarseMax, int nCoarseSubPixIts, TrackerDataPtrVector& vIterationSet)
 {
-  // std::cout<<"In Tracker::TestForCoarse, working on "<<cameraName<<std::endl;
+  std::cout<<"In Tracker::TestForCoarse, working on "<<cameraName<<std::endl;
   ROS_INFO("In Tracker::TestForCoarse, working on %s",cameraName.c_str());
   TrackerDataPtrVector vNextToSearch;
 
@@ -886,11 +886,11 @@ TooN::Vector<6> Tracker::PoseUpdateStep(std::vector<TrackerDataPtrVector>& vIter
           vIterationSets[j][i]->ProjectAndDerivs(kf.mse3CamFromWorld, camera);
       }
     }
-
     for (unsigned int i = 0; i < vIterationSets[j].size(); i++)
     {
       if (vIterationSets[j][i]->mbFound)
         vIterationSets[j][i]->CalcJacobian(mpCurrentMKF->mse3BaseFromWorld, kf.mse3CamFromBase);
+        
     }
   }
 
@@ -1018,8 +1018,6 @@ void Tracker::SetupFineTracking(TDVLevels& vPVSLevels, TrackerDataPtrVector& vIt
 void Tracker::TrackMap()
 {
   // std::cout<<"Starting TrackMap"<<std::endl;
-  ROS_INFO("Starting TrackMap");
-
   // This will collect TrackerDatas that will be used in the pose update near the end of the function
   mvIterationSets.clear();
   mvIterationSets.resize(mvCurrCamNames.size());
@@ -1598,6 +1596,7 @@ TooN::Vector<6> Tracker::CalcPoseUpdate(std::vector<TrackerDataPtrVector>& vIter
       }
 
       TooN::Matrix<2, 6>& m26Jac = td.mm26Jacobian;
+
       wls.add_mJ(v2Error[0], td.mdSqrtInvNoise * m26Jac[0], dWeight);  // These two lines are currently
       wls.add_mJ(v2Error[1], td.mdSqrtInvNoise * m26Jac[1], dWeight);  // the slowest bit of poseits
     }

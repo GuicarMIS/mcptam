@@ -151,7 +151,7 @@ bool MapMakerClientBase::NeedNewMultiKeyFrame(MultiKeyFrame &mkf)
   double dThresh = MapMakerClientBase::sdMaxScaledMKFDist * dMapSizeFactor;
   bool bNeed = dDist > dThresh;
 
-  ROS_INFO_STREAM("NeedNewMultiKeyFrame: dist: " << dDist << " mean depth: " << mkf.mdTotalDepthMean
+  ROS_INFO_STREAM("NeedNewMultiKeyFrame: dist MaxScaledMKFDist: " << sdMaxScaledMKFDist << "and"<< dDist << " mean depth: " << mkf.mdTotalDepthMean
                   << " thresh: " << dThresh << " need: " << (bNeed ? "yes" : "no"));
 
   return bNeed;
@@ -214,7 +214,7 @@ bool MapMakerClientBase::IsDistanceToNearestMultiKeyFrameExcessive(MultiKeyFrame
   dDist *= (1.0 / pClosestMKF->mdTotalDepthMean);  // scale by depth
 
   // Arbitrarily choose 3x the scaled mkf dist to be the limit
-  return (dDist > MapMakerClientBase::sdMaxScaledMKFDist * 3);
+  return (dDist > MapMakerClientBase::sdMaxScaledMKFDist * 3); //eva 3
 }
 
 // Is the given KF way too far away from the nearest other KF?
@@ -241,6 +241,7 @@ void MapMakerClientBase::ProcessIncomingKeyFrames(MultiKeyFrame &mkf)
 
     if (!pKF->mbActive)
     {
+	  ROS_INFO_STREAM("AAAAAAAAAAAAAAAAAAAAAAA MApMakerClientBase= if ProcessIncomingKeyFrames AAAAAAAAAAAAAAAAA ");
       pKF->EraseBackLinksFromPoints();  // Just a precaution
       delete pKF;
       mkf.mmpKeyFrames.erase(it++);

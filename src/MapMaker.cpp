@@ -233,7 +233,7 @@ void MapMaker::run()
       ROS_DEBUG_STREAM("Number of outliers: " << vOutliers.size());
 
       mMap.mbFreshMap = true;
-      // ROS_DEBUG_STREAM("Max cov: "<<mdMaxCov);
+      ROS_DEBUG_STREAM("Max cov: "<<mdMaxCov);
 
       if (nAccepted < 0)  // bad
       {
@@ -279,7 +279,8 @@ void MapMaker::run()
     // Run global bundle adjustment?
     if (mBundleAdjuster.ConvergedRecent() && !mBundleAdjuster.ConvergedFull() && IncomingQueueSize() == 0)
     {
-      ROS_INFO("MapMaker: Bundle adjusting all");
+	  
+      ROS_INFO("MapMaker: Bundle adjusting all ");
       ROS_INFO_STREAM("MapMaker: Number of map points: " << mMap.mlpPoints.size());
       std::vector<std::pair<KeyFrame *, MapPoint *>> vOutliers;
 
@@ -321,11 +322,15 @@ void MapMaker::run()
         HandleOutliers(vOutliers);
         PublishMapVisualization();
 
+		ROS_INFO_STREAM ("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << "mdMaxCov= "<< mdMaxCov << "< InitCovThresh" 
+                          << MapMakerServerBase::sdInitCovThresh << "? ou mbStopInit = "<< mbStopInit);
+                          
         if (mState == MM_INITIALIZING && (mdMaxCov < MapMakerServerBase::sdInitCovThresh || mbStopInit))
         {
           ROS_INFO_STREAM("INITIALIZING, Max cov " << mdMaxCov << " below threshold "
                           << MapMakerServerBase::sdInitCovThresh
-                          << ", switching to MM_RUNNING");
+                          << ", switching to MM_RUNNING" );
+
           mState = MM_RUNNING;
           ClearIncomingQueue();
           mbStopInit = false;
@@ -392,8 +397,10 @@ void MapMaker::run()
 // the tracker thread doesn't want to hang about, so
 // just dumps it on the top of the mapmaker's queue to
 // be dealt with later, and return.
+
 void MapMaker::AddMultiKeyFrame(MultiKeyFrame *&pMKF_Incoming)
 {
+	
   ROS_INFO_STREAM("MapMaker: Incoming MKF, mean depth: " << pMKF_Incoming->mdTotalDepthMean);
 
   MultiKeyFrame *pMKF = pMKF_Incoming;  // take posession
@@ -414,6 +421,7 @@ void MapMaker::AddMultiKeyFrame(MultiKeyFrame *&pMKF_Incoming)
 
   if (mState == MM_INITIALIZING)
     {
+		
         ROS_INFO("============== REMOVING IMAGES ===========");
         pMKF->RemoveImages();  // don't need images when in initializing state
     }
@@ -421,7 +429,7 @@ void MapMaker::AddMultiKeyFrame(MultiKeyFrame *&pMKF_Incoming)
   boost::mutex::scoped_lock lock(mQueueMutex);
   mqpMultiKeyFramesFromTracker.push_back(pMKF);
   lock.unlock();
-  //ROS_INFO_STREAM("BA RUN STATE: " << mBundleAdjuster.Running());
+  //ROS_INFO_STREAM("BA RUN STATE: " << mBundleAdjuster.Running()); //eva
 
   if(mBundleAdjuster.Running()){   // Tell the mapmaker to stop doing low-priority stuff and concentrate on this KF first.
       mBundleAdjuster.RequestAbort();

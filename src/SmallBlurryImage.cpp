@@ -38,6 +38,9 @@
 #include <TooN/SVD.h>
 #include <utility>
 #include <algorithm>
+//eva
+#include <iostream>
+#include <type_traits>
 
 
 // #include <tag/kalmanfilter.h>
@@ -395,4 +398,4 @@ TooN::Matrix<6>& m6Cov)
   se3 = filter.state.pose;
   m6Cov = filter.state.covariance;
 }
-*/
+//*/

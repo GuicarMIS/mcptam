@@ -2,7 +2,7 @@
 
 <arg name="headless" default="false" />
 <arg name="separate_pose" default="false" />
-<arg name="init_mode" default="both" />
+<arg name="init_mode" default="idp" />
 
 <arg name="debug" default="false" />
 <arg name="debug_prefix" value="gdb --args" if="$(arg debug)"/>
@@ -21,21 +21,20 @@
   
   <param name="dynamic_sync" type="bool" value="true" />
   
-  
-  <param name="camera_pose_file" type="string" value="$(find mcptam)/poses/pose_2_ids.dat" />
+ 
+  <param name="camera_pose_file" type="string" value="$(find mcptam)/poses/poses_hdromni.dat" />
 
 
-  <rosparam command="load" file="$(find mcptam)/masks/masks_ids.yaml" />
+  <rosparam command="load" file="$(find mcptam)/masks/HDR_mask.yaml" />
   <param name="masks_dir" type="string" value="$(find mcptam)/masks" />
-
 
   <param name="mm_init_point_mode" type="string" value="$(arg init_mode)" />
   <param name="mm_init_point_max_num" type="int" value="200" />
 
-  <param name="kf_distance_mean_diff_fraction" type="double" value="0.1" /> 
+  <param name="kf_distance_mean_diff_fraction" type="double" value="1" /> 
   <param name="mm_max_scaled_mkf_dist" type="double" value="0.3" />
   <param name="mm_outlier_multiplier" type="double" value="1.1" />
-  <param name="mm_init_cov_thresh" type="double" value="10e12"/>
+  <param name="mm_init_cov_thresh" type="double" value="0.1" />
   <param name="kf_adaptive_thresh" type="bool" value="true" />
   <param name="level_zero_points" type="bool" value="true" />
   
@@ -48,4 +47,3 @@
 <node pkg="tf" type="static_transform_publisher" name="world_tf" args="0 0 0 0 0 3.14159 world vision_world 100" />
 
 </launch>
-

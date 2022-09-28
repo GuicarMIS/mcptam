@@ -158,7 +158,7 @@ void TaylorCamera::RefreshParams()
   if (!mbCalibrationMode)
   {
     mbUsingInversePoly = true;
-    mvxPolyInvCoeffs = FindInvPolyUsingRoots(mv5PolyCoeffs, -1, 0.0001);
+    mvxPolyInvCoeffs = FindInvPolyUsingRoots(mv5PolyCoeffs, -1, 0.8);    //eva 0.0001
 
     if (mvxPolyInvCoeffs.size() == 0)  // Couldn't get good inverse polynomial
     {
@@ -205,6 +205,7 @@ void TaylorCamera::RefreshParams()
 Vector<2> TaylorCamera::Project(const Vector<3>& v3CamFrame)
 {
   mv3LastCam = v3CamFrame;
+  //ROS_INFO("TalylorCamera:: appel fonction Project(appel fonction FindRootWithNewton(affiche Assert)");
 
   double dNorm = sqrt(mv3LastCam[0] * mv3LastCam[0] + mv3LastCam[1] * mv3LastCam[1]);
   double dTheta, dTanTheta;
@@ -270,7 +271,9 @@ Vector<2> TaylorCamera::Project(const Vector<3>& v3CamFrame)
       {
         // Otherwise use Newton's method. Get an approximate solution from linear inverse poly
         double rho_approx = PolyVal(mv2LinearInvCoeffs, CenterAndScale(dTheta, mdThetaMean, mdThetaStd));
+        //ROS_INFO("TaylorCamera:: Get an approximate solution from linear inverse poly by Newton's method");
         mdLastRho = FindRootWithNewton(mv5PolyCoeffs, mv4PolyDerivCoeffs, dTanTheta, rho_approx);
+
       }
     }
 
@@ -319,7 +322,8 @@ double TaylorCamera::FindRootWithNewton(Vector<5> v5Coeffs, Vector<4> v4CoeffsDe
     dRhoPrev = dRho;
 
     ++i;
-    ROS_ASSERT(i <= nMaxIter);  // shouldn't take this long to converge
+    ROS_ASSERT(i <= nMaxIter);  // shouldn't take this long to converge //Eva *3
+   // ROS_INFO_STREAM("assert message loop FindRootWithNewton");
   }
 
   return dRho;
@@ -402,6 +406,8 @@ TooN::Matrix<2, 9> TaylorCamera::GetCameraParameterDerivs()
   Vector<9> v9Original = mv9CameraParams;  // save the actual params
   Vector<3> v3Cam = mv3LastCam;
   Vector<2> v2Out = Project(v3Cam);
+  //ROS_INFO("TalylorCamera:: GetCameraParameterDerivs(appel fonction Project(appel fonction FindRootWithNewton(affiche Assert))");
+
 
   for (int i = 0; i < 9; i++)
   {
@@ -419,7 +425,8 @@ TooN::Matrix<2, 9> TaylorCamera::GetCameraParameterDerivs()
     v9Update[i] += dUpdateMag;
     UpdateParams(v9Update);
     Vector<2> v2Out_B = Project(v3Cam);                    // Get projected position with the new camera params
-    m29NumDerivs.T()[i] = (v2Out_B - v2Out) / dUpdateMag;  // Derivative is change in image location / update magnitude
+	//ROS_INFO("TalylorCamera:: GetCameraParameterDerivs<if default values is zero (ie d, e)>(appel fonction Project(appel fonction FindRootWithNewton(affiche Assert))");
+	m29NumDerivs.T()[i] = (v2Out_B - v2Out) / dUpdateMag;  // Derivative is change in image location / update magnitude
     mv9CameraParams = v9Original;                          // Reset camera params
     RefreshParams();
   }

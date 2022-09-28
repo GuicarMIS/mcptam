@@ -295,14 +295,16 @@ void System::Run()
     {
       GUICommandHandler(mqCommands.front().command, mqCommands.front().params);
       mqCommands.pop();
-    }
-
+    } 
+    mpTracker->RequestInit(true); //eva need to be remove on a normal mode
     mCallbackQueueROS.callAvailable();
   }
 }
 
 void System::GUICommandHandler(std::string command, std::string params)
 {
+
+
   if (command == "quit" || command == "exit")
   {
     mbDone = true;

@@ -337,7 +337,7 @@ protected:
    * @return The vector of coefficients of \f$ g \f$, ordered with the lowest
    *degree first*/
   TooN::Vector<> FindInvPolyUsingRoots(const TooN::Vector<5> &v5PolyCoeffs, int nSpecifiedDegree = -1,
-                                       double dErrorLimit = 0.1);
+                                       double dErrorLimit = 0.1);  //Eva 0.1
 
   /** @brief Finds the root of the camera polynomial
    *

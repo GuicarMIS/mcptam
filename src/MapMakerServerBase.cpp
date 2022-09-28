@@ -65,7 +65,7 @@ int MapMakerServerBase::snMaxTriangulationKFs = 5;
 int MapMakerServerBase::snMaxInitPointsLevelZero = 100;
 double MapMakerServerBase::sdInitDepth = 3.0;
 std::string MapMakerServerBase::ssInitPointMode = "both";  // options: "stereo", "idp", "both"
-double MapMakerServerBase::sdInitCovThresh = 1.0;
+double MapMakerServerBase::sdInitCovThresh = 1.0;   //1.0 mState == MM_INITIALIZING && (mdMaxCov < MapMakerServerBase::sdInitCovThresh || mbStopInit) : state:=MM_RUNNING
 bool MapMakerServerBase::sbLargePointTest = true;
 bool MapMakerServerBase::sbOnlyFirstCameraGeneratesPoints = false;
 
@@ -183,8 +183,8 @@ bool MapMakerServerBase::InitFromMultiKeyFrame(MultiKeyFrame* pMKF, bool bPutPla
   int nLevelPointsLeft;
   static GVars3::gvar3<int> gvnLevelZeroPoints("LevelZeroPoints", 0, GVars3::HIDDEN | GVars3::SILENT);
 
-  ROS_INFO_STREAM("==== STARTING INIT POINT CREATION, MODE: " << MapMakerServerBase::ssInitPointMode << "  =========");
-
+  ROS_INFO_STREAM("==== STARTING INIT POINT CREATION, MODE: " << MapMakerServerBase::ssInitPointMode << "  =========");  //eva: before points visualization
+ 
   // Add points to the map using only the KeyFrames belonging to the last added MultiKeyFrame
   // In this case could set region to KF_ALL since there are no other MultiKeyFrames to begin with
   for (int l = 3; l >= 0; --l)
@@ -263,6 +263,7 @@ bool MapMakerServerBase::InitFromMultiKeyFrame(MultiKeyFrame* pMKF, bool bPutPla
                   << pMKF->mse3BaseFromWorld);
   ROS_INFO_STREAM("MapMakerServerBase: Initial MKF scene depth: " << pMKF->mdTotalDepthMean);
 
+  
   for (KeyFramePtrMap::iterator kf_it = pMKF->mmpKeyFrames.begin(); kf_it != pMKF->mmpKeyFrames.end(); ++kf_it)
   {
     std::string camName = kf_it->first;
@@ -294,7 +295,7 @@ void MapMakerServerBase::MarkFurthestMultiKeyFrameAsBad(MultiKeyFrame& mkf)
       // this kf, so remove point too (but only if it's not a fixed point). Also mark point bad if
       // its patch source is the current KF, since it'll lose its creator.
 
-      if ((point.mMMData.spMeasurementKFs.size() <= 2 && !point.mbFixed) || point.mpPatchSourceKF == &kf)
+      if ((point.mMMData.spMeasurementKFs.size() <= 2 && !point.mbFixed) || point.mpPatchSourceKF == &kf)   // (point.mMMData.spMeasurementKFs.size() <= 2 && !point.mbFixed) EVA
         point.mbBad = true;
       /*
       else
@@ -341,6 +342,7 @@ void MapMakerServerBase::AddMultiKeyFrameAndMarkLastDeleted(MultiKeyFrame* pMKF,
   {
     MultiKeyFrame& mkf = *(mMap.mlpMultiKeyFrames.back());
     mkf.mbDeleted = true;
+
   }
 
   pMKF->mbFixed = false;
@@ -363,7 +365,6 @@ void MapMakerServerBase::AddMultiKeyFrameAndMarkLastDeleted(MultiKeyFrame* pMKF,
 bool MapMakerServerBase::AddMultiKeyFrameAndCreatePoints(MultiKeyFrame* pMKF)
 {
   ROS_INFO_STREAM("MapMakerServerBase: Adding new MKF to map, mean depth: " << pMKF->mdTotalDepthMean);
-
   pMKF->mbFixed = false;
 
   for (KeyFramePtrMap::iterator it = pMKF->mmpKeyFrames.begin(); it != pMKF->mmpKeyFrames.end(); it++)
@@ -787,6 +788,7 @@ bool MapMakerServerBase::AddPointEpipolar(KeyFrame& kfSrc, KeyFrame& kfTarget, i
     point.RefreshPixelVectors();
 
     TooN::Vector<2> v2Image = cameraTarget.Project(vMapPointPositions[i].second);
+    //ROS_INFO("MapMakerServerBase:: AddPointEpipolar( appel fonction Project(appel fonction FindRootWithNewton(affiche Assert)))");
 
     if (cameraTarget.Invalid())
       continue;
@@ -875,6 +877,7 @@ bool MapMakerServerBase::AddPointEpipolar(KeyFrame& kfSrc, KeyFrame& kfTarget, i
     point.RefreshPixelVectors();
 
     cameraTarget.Project(vMapPointPositions[nCurrBest].second);
+    //ROS_INFO("MapMakerServerBase:: ReFind_Common <cameraTarget>( appel fonction Project(appel fonction FindRootWithNewton(affiche Assert)))");
     TooN::Matrix<2> m2CamDerivs = cameraTarget.GetProjectionDerivs();
 
     finder.CalcSearchLevelAndWarpMatrix(point, kfTarget.mse3CamFromWorld, m2CamDerivs);
@@ -977,6 +980,8 @@ bool MapMakerServerBase::ReFind_Common(KeyFrame& kf, MapPoint& point)
 
   TaylorCamera& camera = mmCameraModels[kf.mCamName];
   TooN::Vector<2> v2Image = camera.Project(v3Cam);
+  //ROS_INFO("MapMakerServerBase:: ReFind_Common <camera>( appel fonction Project(appel fonction FindRootWithNewton(affiche Assert)))");
+
 
   if (camera.Invalid())
   {

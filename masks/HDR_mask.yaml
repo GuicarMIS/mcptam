@@ -1,0 +1,2 @@
+---
+masks: {camera1: MASK_0.bmp, camera2: MASK_1.bmp, camera3: MASK_2.bmp, camera4: MASK_3.bmp}
